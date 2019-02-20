@@ -1,0 +1,34 @@
+{
+   "questions":[
+      {
+         "question":"What song did Kim Bum Soo sing on Fantastic Duo with 1 other?",
+         "choices":[
+            "My Delight",
+            "I Miss You",
+            "Hello Goodbye Hello",
+            "The One"
+         ],
+         "answer":1
+      },
+      {
+         "question":"What song did Taeyang sing on Fantastic Duo with 1 other?",
+         "choices":[
+            "Where U At",
+            "Take It Slow",
+            "Eyes, Nose, Lips",
+            "Wedding Dress"
+         ],
+         "answer":2
+      },
+      {
+         "question":"What song did Hong Jing Young sing on Fantastic Duo with 3 others?",
+         "choices":[
+            "Boogie Man",
+            "Cheer Up",
+            "My Love",
+            "Love Battery"
+         ],
+         "answer":3
+      }
+   ]
+}

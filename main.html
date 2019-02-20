@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <link href='style.css' type='text/css' rel='stylesheet'>
+    <link href="http://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Cabin" rel="stylesheet" type="text/css">
+    <title>Quiz Main Page</title>
+  </head>
+  <body>
+    <div class='all'>
+      <h2 id='questionNum'>Question</h2>
+      <h3 id='question'>Question 0</h3>
+      <form name='form'>
+        <div class='radio'>
+          <input type='radio' name='answerChoice' value='choice 1' id='choice1'/>
+          <span><label for='choice1'>Choice 1</label></span>
+           
+          <input type='radio' name='answerChoice' value='choice 2' id='choice2'/>
+          <span><label for='choice2'>Choice 2</label></span><br />
+          
+          <input type='radio' name='answerChoice' value='choice 3' id='choice3'/>
+          <span><label for='choice3'>Choice 3</label></span>
+          
+          <input type='radio' name='answerChoice' value='choice 4' id='choice4'/>
+          <span><label for='choice4'>Choice 4</label></span>
+        </div>
+
+        <input type='radio' name='answerChoice' value='choice 5' class='invis' checked='checked'/>
+        <div class='buttons'>
+          <p>
+            <input type='button' name='prev' id='prev' value='Prev'/>
+            <input type='button' name='next' id='next' value='Next'/>
+          </p>
+          <p>
+            <input type='button' name='submit' id='submit' value='Submit'/>
+          </p>
+        </div>
+      </form>
+    </div>
+    <script src='jquery-3.2.0.js'></script>
+    <script src='util.js'></script>
+    <script src='httprequest.js'></script>
+    <script>
+      var form = document.form;
+      // Question object constructor
+      function Question(question, choices, answer) {
+        this.question = question; // String containing question
+        this.choices = choices; // Array of Strings containing answer choices
+        this.answer = answer; // int containing which choice is correct (0 to 3)
+      }
+
+      // list of all the questions
+      var allQuestions = [];
+      var numOfQuestions = 0;
+
+      // keeps track of current question number (displayed - 1)
+      var curQuestNum = 0;
+      // keeps track of the user's answers
+      var answers = [];
+
+      // retrieving questions from JSON file
+      
+      var request = new HttpRequest('questions.json', function(data) {
+        allQuestions = JSON.parse(data)["questions"];
+        console.log(allQuestions)
+        onQuestionsLoaded()
+      });
+      request.send();
+
+      function onQuestionsLoaded() {
+        numOfQuestions = allQuestions.length;
+        // fills answers initially with all 4 (not answered)
+        for (var i = 0; i < numOfQuestions; i++) {
+          answers.push(4);
+        }
+        update();
+      }
+
+      var questionNum = document.getElementById('questionNum');
+      var question = document.getElementById('question');
+      var labels = document.querySelectorAll('label');
+      var radios = form.answerChoice;
+
+      function update() {
+        questionNum.innerHTML = 'Question ' + (curQuestNum + 1);
+        var curQuestion = allQuestions[curQuestNum];
+        question.innerHTML = curQuestion.question;
+        for (var i = 0; i < labels.length; i++) {
+          labels[i].innerHTML = curQuestion.choices[i];
+        }
+        radios[answers[curQuestNum]].checked = true;
+      }
+
+      function onClickNext() {
+        var selected = getSelectedRadioButton(radios);
+        /*if (selected == 4) {
+          alert("Please answer the question before moving on.");
+        }
+        else {*/
+          answers[curQuestNum] = selected;
+          curQuestNum++;
+          if (curQuestNum == numOfQuestions-1) {
+            next.disabled = true;
+          }
+          prev.disabled = false;
+          var $fade = $('#question').add($('span'));
+          $fade.fadeOut(500, update);
+          $fade.fadeIn(500);
+        //}
+      }
+
+      function onClickPrev() {
+        answers[curQuestNum] = getSelectedRadioButton(radios);
+        curQuestNum--;
+        if (curQuestNum == 0) {
+          prev.disabled = true;
+        }
+        next.disabled = false;
+        var $fade = $('#question').add($('span'));
+        $fade.fadeOut(500, update);
+        $fade.fadeIn(500);
+      }
+
+      function onClickSubmit() {
+        answers[curQuestNum] = getSelectedRadioButton(radios);
+        if (answers.indexOf(4) > -1) {
+          alert("Please answer all of the questions before submitting.")
+        }
+        else {
+          var score = 0;
+          for (var i = 0; i < numOfQuestions; i++) {
+            if (answers[i] == allQuestions[i].answer) {
+              score++;
+            }
+          }
+          var output = "<h2>Your score is " + score + " out of " + numOfQuestions;
+          output += " or " + Math.round(score/numOfQuestions * 100) + "%</p>";
+          document.querySelector('.all').innerHTML = output;
+        }
+
+      }
+
+      var next = document.getElementById('next');
+      var prev = document.getElementById('prev');
+      prev.disabled = true;
+      next.disabled = false;
+      document.getElementById('submit').addEventListener('click', onClickSubmit);
+      next.addEventListener('click', onClickNext);
+      prev.addEventListener('click', onClickPrev);
+
+      // allQuestions[0] = new Question(
+      //   "What song did Kim Bum Soo sing on Fantastic Duo with 1 other?",
+      //   ["My Delight", "I Miss You", "Hello Goodbye Hello", "The One"], 1);
+      // // allQuestions[0] = JSON.parse('{ "question":"Who sang the first opening of the anime ReZero?", "choices": ["Konomi Suzuki", "Larval Stage Planning", "MYTH & ROID", "fhana"], "answer": 0}')
+      // allQuestions[1] = new Question(
+      //   "What song did Taeyang sing on Fantastic Duo with 1 other?",
+      //   ["Where U At", "Take It Slow", "Eyes, Nose, Lips", "Wedding Dress"], 2);
+      // allQuestions[2] = new Question(
+      //   "What song did Hong Jing Young sing on Fantastic Duo with 3 others?",
+      //   ["Boogie Man", "Cheer Up", "My Love", "Love Battery"], 3);
+    </script>
+  </body>
+</html>
+
